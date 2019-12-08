@@ -2,16 +2,14 @@
 <template>
   <div id="login" class="card" v-bind:style="{ backgroundColor: bgColor}">
     <span id="title" v-bind:style="{ color: textColor}">Manager Login</span>
-    <div>
-      <span id="title1"></span>
-    </div>
-    <b-container fluid>
+    <b-container fluid v-bind:style="{ color: textColor}">
       <input
         class="loginField"
         type="text"
         id="username"
         v-model="username"
         placeholder="Enter username"
+        @keyup.enter="Login()"
       />
       <input
         class="loginField"
@@ -19,24 +17,26 @@
         id="password"
         v-model="password"
         placeholder="Enter password"
+        @keyup.enter="Login()"
       />
       <button
         type="button"
-        v-on:click="getLogin(username,password);"
+        v-on:click="Login()"
         class="btn btn-primary btn-lg loginField button"
         v-b-tooltip.hover
         title="Login"
       >Login</button>
       <button
         type="button"
-        v-on:click="createLogin(username,password)" 
-        @:click="goToSignupPage()"
+        v-on:click="goToSignupPage()"
         class="btn btn-primary btn-lg loginField button"
         v-b-tooltip.hover
         title="Create an account"
       >Sign up</button>
     </b-container>
-    <p>Do not have an account yet? Fill in the information and Sign Up Now!</p>
+    <p
+      v-bind:style="{ color: textColor}"
+    >Do not have an account yet? Sign Up Now!</p>
   </div>
 </template>
 
@@ -60,51 +60,99 @@ var AXIOS = axios.create({
 export default {
   data() {
     return {
-      // login: {
-      //   type: Object
-      // },
       bgColor: "",
       textColor: "",
-      error: "",
-      username:"",
-      password:""
+      errorLogin: "",
+      username: "",
+      password: "",
+      loggedIn: true,
+      login: [],
+      manager: [],
+      student: [],
+      tutor: []
     };
   },
   created: function() {
-    var darkModeOn = localStorage.getItem("DarkModeOn");
-    if (darkModeOn === "true") {
-      this.bgColor = "rgb(53,58,62)";
-      this.textColor = "white";
-    } else {
-      this.bgColor = "rgb(250,250,250)";
-      this.textColor = "black";
-    }
+    this.updateLogin()
+    this.updateManager()
+    this.updateStudent()
+    this.updateTutor()
+    this.setDarkMode()
   },
   methods: {
-    getLogin: function(username, password) {
-      AXIOS.get('/login/list/'+username)
+    updateLogin(){
+      AXIOS.get("login/list/")
         .then(response => {
           this.login = response.data;
-          // this.goToHomePage();
-          if (this.password == password) {
-            this.goToHomePage();
-            localStorage.setItem("isLoggedIn", "true");
-            this.$loggedInEvent.$emit("setLoggedInState", true);
-          } else {
-            document.getElementById("title1").innerText =
-              "Password is not correct, please try again";
-          }
         })
         .catch(e => {
-          console.log(e.message);
-          document.getElementById("title1").innerText =
-            "";
+          this.errorLogin = e.message
+          console.log(this.errorLogin);
         });
     },
-    createLogin: function(username,password) {
-       AXIOS.post('/login/' + username + '?password=' + password).then(response => {
-        this.login = response.data;
-      })
+    updateManager(){
+      AXIOS.get("manager/list/")
+        .then(response => {
+          this.manager = response.data;
+        })
+        .catch(e => {
+          this.errorLogin = e.message
+          console.log(this.errorLogin);
+        });
+    },
+    updateStudent(){
+      AXIOS.get("student/list/")
+        .then(response => {
+          this.student = response.data;
+        })
+        .catch(e => {
+          this.errorLogin = e.message
+          console.log(this.errorLogin);
+        });
+    },
+    updateTutor(){
+      AXIOS.get("tutor/list/")
+        .then(response => {
+          this.tutor = response.data;
+        })
+        .catch(e => {
+          this.errorLogin = e.message
+          console.log(this.errorLogin);
+        });
+    },
+    Login: function() {
+      if(this.username != "" && this.password != "") { 
+        var isValid = false
+        for(var i=0; i < this.manager.length; i++){
+          if(this.manager[i].loginInfo.userName == this.username && this.manager[i].loginInfo.password == this.password){
+            isValid = true
+            break;
+          } 
+        }
+        if(isValid == false){
+          for(var j=0; j < this.tutor.length; j++){
+            if(this.tutor[j].loginInfo.userName == this.username && this.tutor[j].loginInfo.password == this.password){
+              alert("ERROR: username \"" + this.username + "\" is a tutor account, only a manager account can login!")
+              return -1
+            } 
+          }
+          for(var k=0; k < this.student.length; k++){
+            if(this.student[k].loginInfo.userName == this.username && this.student[k].loginInfo.password == this.password){
+              alert("ERROR: username \"" + this.username + "\" is a student account, only a manager account can login!")
+              return -1
+            } 
+          }
+        }
+        if(isValid == false){
+          alert("ERROR: The username and/or password is incorrect!")
+        } else{
+          this.$events.fire("loggedIn-set", this.username);
+          this.goToHomePage();
+        }
+      }
+      else{
+        alert("ERROR: A username and password must be present to login!")
+      }
     },
     goToHomePage: function() {
       Router.push({
@@ -123,17 +171,14 @@ export default {
       if (darkModeOn === "true") {
         this.bgColor = "rgb(53, 58, 62)";
         this.textColor = "white";
-        // this.buttonClass = "btn btn-dark btn-lg loginField";
       } else {
         this.bgColor = "rgb(250,250,250)";
         this.textColor = "black";
-        // this.buttonClass = "btn btn-white btn-lg loginField";
       }
-     }
-    },
-    mounted() {
-      // Listens to the setDarkModeState event emitted from the LogoBar component
-      this.$root.$on("setDarkModeState", this.setDarkMode);
+    }
+  },
+  mounted() {
+    this.$root.$on("setDarkModeState", this.setDarkMode);
   }
 };
 </script>

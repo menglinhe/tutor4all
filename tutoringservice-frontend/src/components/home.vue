@@ -1,11 +1,8 @@
 <!--- this component is the home page --->
 <template>
-  <div id="home-container" class="card" v-bind:style="{ backgroundColor: bgColor}">
-    <span id="title" v-bind:style="{color: textColor}">Home Page</span>
-    <div>
-      <span id="title1"></span>
-    </div>
-    <p>Check out our functionality for you!</p>
+  <div id="home" class="card" v-bind:style="{ backgroundColor: bgColor}">
+    <span class="text-center" style="font-size:35px;" id="title" v-bind:style="{color: textColor}"><strong>Home Page</strong></span>
+    <p style="padding:15px;font-size:22px;" v-bind:style="{color: textColor}">Check out the following features!</p>
     <b-container fluid>
       <b-row id="functionality">
         <b-col>
@@ -20,11 +17,20 @@
         <b-col>
           <button
             type="button"
-            @click="goToTutorApplicationPage()"
+            @click="goToSubjectPage()"
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
-            title="View Tutor Application"
-          >View Tutor Application</button>
+            title="View Subjects"
+          >Subjects</button>
+        </b-col>
+         <b-col>
+          <button
+            type="button"
+            @click="goToOfferingPage()"
+            class="btn btn-primary btn-lg home button"
+            v-b-tooltip.hover
+            title="View Offerings"
+          >Offerings</button>
         </b-col>
         <b-col>
           <button
@@ -33,7 +39,7 @@
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
             title="View Tutors"
-          >View Tutors</button>
+          >Tutors</button>
         </b-col>
         <b-col>
           <button
@@ -42,9 +48,10 @@
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
             title="View Studnet"
-          >View Student</button>
+          >Students</button>
         </b-col>
-
+      </b-row>
+      <b-row>
         <b-col>
           <button
             type="button"
@@ -52,7 +59,16 @@
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
             title="Setup Commission"
-          >Setup Commission</button>
+          >Create Commission</button>
+        </b-col>
+        <b-col>
+          <button
+            type="button"
+            @click="goToTutorApplicationPage()"
+            class="btn btn-primary btn-lg home button"
+            v-b-tooltip.hover
+            title="View Tutor Application"
+          >Tutor Applications</button>
         </b-col>
         <b-col>
           <button
@@ -61,8 +77,9 @@
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
             title="View Subject Request"
-          >Subject Request</button>
+          >Subject Requests</button>
         </b-col>
+
         <b-col>
           <button
             type="button"
@@ -70,7 +87,17 @@
             class="btn btn-primary btn-lg home button"
             v-b-tooltip.hover
             title="View Student Review"
-          >View Student Reviews</button>
+          >Student Reviews</button>
+        </b-col>
+
+        <b-col>
+          <button
+            type="button"
+            @click="goToAvailableSessionPage()"
+            class="btn btn-primary btn-lg home button"
+            v-b-tooltip.hover
+            title="View Available Sessions"
+          >Available Sessions</button>
         </b-col>
       </b-row>
     </b-container>
@@ -80,13 +107,12 @@
 <script>
 import axios from "axios";
 import Router from "../router";
-// import func from '../../vue-temp/vue-editor-bridge';
 
 var config = require("../../config");
 
 var frontendUrl = "http://" + config.build.host + ":" + config.build.port;
 var backendUrl = "http://localhost:8080/";
-  // "http://" + config.build.backendHost + ":" + config.build.backendPort;
+// "http://" + config.build.backendHost + ":" + config.build.backendPort;
 
 // axios config
 var AXIOS = axios.create({
@@ -95,14 +121,11 @@ var AXIOS = axios.create({
 });
 
 export default {
+  name: "home",
   data() {
     return {
-      home: {
-        type: Object
-      },
       bgColor: "",
-      textColor: "",
-      // error: ""
+      textColor: ""
     };
   },
   created: function() {
@@ -123,43 +146,6 @@ export default {
       this.textColor = "black";
       // this.bgColor = "rgb(248, 249, 251)";
     }
-
-    // since we will only have one manager, I don't think the following 4 blocks of code are necessary
-    // get all managers from backend
-    // AXIOS.get('/managers').then(response => {
-    //     this.managers = response.data;
-    //     this.managersLoaded = true;
-    // })
-    // .catch(e => {
-    //     this.error = e;
-    // });
-
-    // // get all managers from manager database
-    // AXIOS_Manager.get("/getAllManagers").then(response => {
-    //     this.externalManagers = response.data;
-    //     this.externalManagersLoaded = true;
-    // })
-    // .catch(e => {
-    //     this.error = e;
-    // });
-
-    // // get all logins from backend
-    // AXIOS.get('/logins').then(response => {
-    //     this.logins = response.data;
-    //     this.loginsLoaded = true;
-    // })
-    // .catch(e => {
-    //     this.error = e;
-    // });
-
-    // // get all logins from database
-    // AXIOS_Logins.get("getAllLogins").then(response => {
-    //     this.externalLogins = response.data;
-    //     this.externalLoginsLoaded = true;
-    // })
-    // .catch(e => {
-    //     this.error = e;
-    // });
   },
   methods: {
     setDarkMode: function(darkModeOn) {
@@ -195,6 +181,12 @@ export default {
         name: "student"
       });
     },
+    goToOfferingPage: function() {
+      Router.push({
+        path: "offering",
+        name: "offering"
+      });
+    },
     goToCommissionPage: function() {
       Router.push({
         path: "/commission",
@@ -207,15 +199,26 @@ export default {
         name: "subjectRequest"
       });
     },
+    goToSubjectPage: function() {
+      Router.push({
+        path: "/subject",
+        name: "subject"
+      });
+    },
     goToReviewPage: function() {
       Router.push({
         path: "/review",
         name: "review"
       });
+    },
+    goToAvailableSessionPage: function() {
+      Router.push({
+        path: "/availableSession",
+        name: "availableSession"
+      });
     }
   },
   mounted() {
-    // Listens to the setDarkModeState event emitted from the LogoBar component
     this.$root.$on("setDarkModeState", this.setDarkMode);
   }
 };
@@ -227,9 +230,14 @@ b-container {
   height: auto;
   width: auto;
 }
+button {
+  width: 150px;
+  height: auto;
+  margin-bottom: 10px;
+  margin-left: auto;
+}
 #functionality {
   color: black;
   font-size: 25px;
-  padding-left: 15px;
 }
 </style>

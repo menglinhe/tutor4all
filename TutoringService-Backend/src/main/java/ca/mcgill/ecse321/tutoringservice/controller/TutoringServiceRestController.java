@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -881,7 +882,7 @@ public class TutoringServiceRestController {
 	 * @param tutoringSystemID
 	 * @param offeringIDs (optional)
 	 * @param requestIDs (optional)
- 	 * @sample  /student/create/{personId}?firstName=<firstName>&lastName=<lastName>&dob=<dob>&email=<email>&phone=<phone>&numCoursesEnrolled=<numCoursesEnrolled>&tutoringSystemID=<tutoringSystemID>[&offeringIDs=<offeringIDs..>&requestIDs=<requestIDs..>]
+ 	 * @sample  /student/create/{personId}?firstName=<firstName>&lastName=<lastName>&dob=<dob>&email=<email>&phone=<phone>&tutoringSystemID=<tutoringSystemID>[&offeringIDs=<offeringIDs..>&requestIDs=<requestIDs..>]
 	 */
 	@PostMapping(value = {"/student/create/{studentID}", "/student/create/{studentID}/"})
 	public StudentDto createStudent(@PathVariable("studentID") Integer studentID,
@@ -890,12 +891,12 @@ public class TutoringServiceRestController {
 			@RequestParam("dob") Date dob,
 			@RequestParam("email") String email,
 			@RequestParam("phone") Integer phone,
-			@RequestParam("numCoursesEnrolled") Integer numCoursesEnrolled,
 			@RequestParam("userName") String userName,
 			@RequestParam("tutoringSystemID") Integer tutoringSystemID,
 			@RequestParam(name = "offeringIDs", required = false) Set<String> offeringIDs,
 			@RequestParam(name = "requestIDs", required = false) Set<Integer> requestIDs) throws IllegalArgumentException {
 
+		Integer numCoursesEnrolled = 0;
 		Set<SubjectRequest> requests = null;
 		if(requestIDs != null){
 			requests = new HashSet<SubjectRequest>();
@@ -912,6 +913,7 @@ public class TutoringServiceRestController {
 				Offering offering = service.getOffering(offeringID);
 				offerings.add(offering);
 			}
+			numCoursesEnrolled = offerings.size();
 		}
 		
 		Login login = service.getLogin(userName);
@@ -1157,7 +1159,7 @@ public class TutoringServiceRestController {
 	 * @sample /login/list
 	 */
 
-	@GetMapping(value = { "/login/list/{username}", "/login/list/{username}/" })
+	@GetMapping(value = { "/login/list", "/login/list/" })
 	public List<LoginDto> getAllLoginSystems() {
 		List<LoginDto> loginsDtos = new ArrayList<>();
 		for (Login login : service.getAllLogins()) {
@@ -1166,13 +1168,29 @@ public class TutoringServiceRestController {
 		return loginsDtos;
 	}
 	
-//	@GetMapping(value= { "/login/{userName}", "/login/{userName}/"})
-//	public LoginDto getLogin(String userName) {
-//		LoginDto loginDto = new LoginDto();
-//		Login login = service.getLogin(userName);
-//		loginDto = convertToDto(login);
-//		return loginDto;
-//	}
+	/**
+	 * @return login if it exists
+	 * @sample /login/check/omar?password=123
+	 */
+		@GetMapping(value = { "/login/check/{userName}", "/login/{userName}/" })
+		public LoginDto getLogin(@PathVariable("userName") String userName,
+				@RequestParam("password") String password) throws IllegalArgumentException{
+			String error = "";
+			LoginDto loginDto = new LoginDto();
+			Login login= service.getLogin(userName);
+			String databasepassword = login.getPassword();
+			
+			if (!(databasepassword.equals(password))) {
+				error += "Login does not exist!";
+			}
+			error = error.trim();
+			if (error.length() > 0) {
+				throw new IllegalArgumentException(error);
+			}
+			
+			loginDto = convertToDto(login);
+			return loginDto;
+		}
 	
 	/**
 	 * @return a list of all Tutors
@@ -1260,7 +1278,7 @@ public class TutoringServiceRestController {
 	}
 	
 	@GetMapping(value = { "/tutorApplication/{tutorApplicationID}", "/tutorApplication/{tutorApplicationID}/" })
-	public TutorApplicationDto getTutorApplication(Integer tutorApplicationID) {
+	public TutorApplicationDto getTutorApplication(@PathVariable("tutorApplicationID") Integer tutorApplicationID) {
 		TutorApplicationDto tutorApplicationDto = new TutorApplicationDto();
 		TutorApplication tutorApplication = service.getTutorApplication(tutorApplicationID);
 		tutorApplicationDto = convertToDto(tutorApplication);
@@ -1376,5 +1394,131 @@ public class TutoringServiceRestController {
 		}
 		return classroomDtos;
 	}
+	
+	/**
+	 * @return Remove subject request
+	 * @sample /subjectRequest/delete/<requestID>
+	 */
+	@DeleteMapping(value = {"/subjectRequest/delete/{requestID}", "/subjectRequest/delete/{requestID}/"})
+	public SubjectRequestDto deleteSubjectRequest(@PathVariable("requestID") Integer requestID) {
+		SubjectRequestDto subjectRequestDto = convertToDto(service.getSubjectRequest(requestID));
+		service.deleteSubjectRequest(requestID);
+		return subjectRequestDto;
+	}
+	
+	/**
+	 * @return Remove subject 
+	 * @sample /subject/delete/<courseID>
+	 */
+	@DeleteMapping(value = {"/subject/delete/{courseID}", "/subject/delete/{courseID}/"})
+	public SubjectDto deleteSubject(@PathVariable("courseID") String courseID) {
+		SubjectDto subjectDto = convertToDto(service.getSubject(courseID));
+		service.deleteSubject(courseID);
+		return subjectDto;
+	}
+	
+	/**
+	 * @return Remove commission 
+	 * @sample /commission/delete/<commissionID>
+	 */
+	@DeleteMapping(value = {"/commission/delete/{commissionID}", "/commission/delete/{commissionID}/"})
+	public CommissionDto deleteCommission(@PathVariable("commissionID") Integer commissionID) {
+		CommissionDto commissionDto = convertToDto(service.getCommission(commissionID));
+		service.deleteCommisison(commissionID);
+		return commissionDto;
+	}
+	
+	/**
+	 * @return Remove tutorApplication 
+	 * @sample /tutorApplcation/delete/<applicationId>
+	 */
+	@DeleteMapping(value = {"/tutorApplication/delete/{applicationId}", "/tutorApplication/delete/{applicationId}/"})
+	public TutorApplicationDto deleteTutorApplication(@PathVariable("applicationId") Integer applicationId) {
+		TutorApplicationDto tutorApplicationDto = convertToDto(service.getTutorApplication(applicationId));
+		service.deleteTutorApplication(applicationId);
+		return tutorApplicationDto;
+	}
+	
+	/**
+	 * @return Remove review 
+	 * @sample /tutorApplcation/delete/<applicationId>
+	 */
+	@DeleteMapping(value = {"/review/delete/{reviewID}", "/review/delete/{reviewID}/"})
+	public ReviewDto deleteReview(@PathVariable("reviewID") Integer reviewID) {
+		ReviewDto reviewDto = convertToDto(service.getReview(reviewID));
+		service.deleteReview(reviewID);
+		return reviewDto;
+	}
+	
+	/**
+	 * @return Remove offering 
+	 * @sample /offering/delete/<offeringID>
+	 */
+	@DeleteMapping(value = {"/offering/delete/{offeringID}", "/offering/delete/{offeringID}/"})
+	public OfferingDto deleteOffering(@PathVariable("offeringID") String offeringID) {
+		OfferingDto offeringDto = convertToDto(service.getOffering(offeringID));
+		service.deleteOffering(offeringID);
+		return offeringDto;
+	}
+	
+	/**
+	 * @return Set review offering for classroom 
+	 * @sample /classroom/review/<roomCode>?offeringID=<offeringID>
+	 */
+	@PatchMapping(value = { "/classroom/review/{roomCode}", "/classroom/review/{roomCode}/" })
+	public ClassroomDto setClassroomReviewSession(@PathVariable("roomCode") String roomCode, @RequestParam("offeringID") String offeringID) {
+		Classroom classroom = (service.setClassroomReviewSession(roomCode, offeringID));
+		ClassroomDto classroomDto = convertToDto(classroom);
+
+		return classroomDto;
+	}
+	
+	/**
+	 * @return Add student to offering 
+	 * @sample /offering/addstudent/{offeringID}
+	 */
+	@PatchMapping(value = { "/offering/addstudent/{offeringID}", "/offering/addstudent/{offeringID}/" })
+	public OfferingDto setOfferingStudent(@PathVariable("offeringID") String offeringID, @RequestParam("studentID") Integer studentID) {
+		Offering offering = (service.setOfferingStudent(offeringID, studentID));
+		OfferingDto offeringDto = convertToDto(offering);
+
+		return offeringDto;
+	}
+	
+	/**
+	 * @return Add offering to student 
+	 * @sample /student/offering/{studentID}
+	 */
+	@PatchMapping(value = { "/student/offering/{studentID}", "/student/offering/{studentID}/" })
+	public StudentDto setStudentOffering(@PathVariable("studentID") Integer studentID, @RequestParam("offeringID") String offeringID) {
+		Student student = (service.setStudentOffering(studentID, offeringID));
+		StudentDto studentDto = convertToDto(student);
+
+		return studentDto;
+	}
+	
+	/**
+	 * @return Remove available session
+	 * @sample /availableSession/delete/{availableSessionID}
+	 */
+	@DeleteMapping(value = { "/availableSession/delete/{availableSessionID}", "/availableSession/delete/{availableSessionID}/" })
+	public AvailableSessionDto deleteAvailableSession(@PathVariable("availableSessionID") Integer availableSessionID) {
+		AvailableSessionDto availableSessionDto = convertToDto(service.getAvailableSession(availableSessionID));
+		service.deleteAvailableSession(availableSessionID);
+		return availableSessionDto;
+	}
+	
+	/**
+	 * @return Remove available session
+	 * @sample /availableSession/delete/{availableSessionID}
+	 */
+	@DeleteMapping(value = { "/classroom/delete/{roomCode}", "/classroom/delete/{roomCode}/" })
+	public ClassroomDto deleteClassroom(@PathVariable("roomCode") String roomCode) {
+		ClassroomDto classroomDto = convertToDto(service.getClassroom(roomCode));
+		service.deleteClassroom(roomCode);
+		return classroomDto;
+	}
 }
+
+
 

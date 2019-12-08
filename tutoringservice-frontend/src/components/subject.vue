@@ -1,10 +1,10 @@
-<!--- This component acts as a page to view tutor list and add/remove tutor --->
+<!--- This component acts as a page to view subject and add subject from request --->
 <template>
-  <div id="tutor" class="card" v-bind:style="{ backgroundColor: bgColor}">
+  <div id="subject" class="card" v-bind:style="{ backgroundColor: bgColor}">
     <b-container fluid :style="{color: textColor}">
-      <b-col id="tutorList">
+      <b-col id="subjectList">
         <h6>
-          <strong>VIEW TUTORS</strong>
+          <strong>VIEW SUBJECTS</strong>
         </h6>
 
         <div id="table-wrapper" class="container">
@@ -26,7 +26,7 @@
               <div class="table-button-container">
                 <button
                   class="btn btn-danger btn-sm icon"
-                  title="Remove tutor!"
+                  title="Remove subject!"
                   @click="deleteRow(props.rowData)"
                 >
                   <i class="fa fa-trash"></i>
@@ -69,7 +69,7 @@ var AXIOS = axios.create({
 });
 
 export default {
-  name: "tutor",
+  name: "subject",
   components: {
     Vuetable,
     VuetablePagination,
@@ -80,7 +80,7 @@ export default {
     return {
       perPage: 10,
       css: {
-        tableClass: `table table-bordered table-hover`,
+        tableClass: "table table-bordered table-hover",
         ascendingIcon: "fa fa-chevron-up",
         descendingIcon: "fa fa-chevron-down",
         loadingClass: "loading",
@@ -89,57 +89,46 @@ export default {
       },
       sortOrder: [
         {
-          field: "personId",
-          sortField: "personId",
+          field: "courseID",
+          sortField: "courseID",
           direction: "asc"
         }
       ],
       fields: [
         {
-          name: "personId",
+          name: "courseID",
           title: "ID",
-          sortField: "personId"
+          sortField: "courseID"
         },
         {
-          name: "firstName",
-          title: `<span class="icon orange"><i class="fa fa-user"></i></span> First Name`,
-          sortField: "firstName"
+          name: "name",
+          title: "Name",
+          sortField: "name"
         },
         {
-          name: "lastName",
-          title: `<span class="icon orange"><i class="fa fa-user"></i></span> Last Name`,
-          sortField: "lastName"
+          name: "description",
+          title: `<span class="icon orange"><i class="fa fa-file-alt"></i></span> Description`,
+          sortField: "description"
         },
         {
-          name: "dateOfBirth",
+          name: "subjectType",
           title:
-            '<span class="icon orange"><i class="fa fa-birthday-cake"></i></span> Birthdate',
-          sortField: "dateOfBirth"
+            '<span class="icon orange"><i class="fas fa-school"></i></span> School Type',
+          sortField: "subjectType"
         },
         {
-          name: "email",
+          name: "university",
           title:
-            '<span class="icon orange"><i class="fa fa-envelope"></i></span> Email',
-          sortField: "email"
-        },
-        {
-          name: "phoneNumber",
-          title:
-            '<span class="icon orange"><i class="fa fa-phone"></i></span> Phone',
-          sortField: "phoneNumber"
-        },
-        {
-          name: "isRegistered",
-          title: "Registered",
-          sortField: "isRegistered"
+            '<span class="icon orange"><i class="fas fa-university"></i></span> University',
+          sortField: "university"
         },
         {
           name: "actions",
           title: "Actions"
         }
       ],
-      tutors: [],
-      errorTutor: "",
+      subjects: [],
+      errorSubject: "",
       response: [],
       bgColor: "",
       textColor: ""
@@ -147,13 +136,13 @@ export default {
   },
 
   watch: {
-    tutors(newVal, oldVal) {
+    subjects(newVal, oldVal) {
       this.$refs.vuetable.refresh();
     }
   },
 
   created: function() {
-    this.updateTutors();
+    this.updateSubjects();
     this.setDarkMode()
   },
   methods: {
@@ -167,21 +156,22 @@ export default {
     onChangePage(page) {
       this.$refs.vuetable.changePage(page);
     },
-    updateTutors() {
-      // Initializing students from backend
-      AXIOS.get(`tutor/list`)
+    updateSubjects() {
+      // Initializing reviews from backend
+      AXIOS.get(`subject/list`)
         .then(response => {
           // JSON responses are automatically parsed.
-          this.tutors = response.data;
+          this.subjects = response.data;
         })
         .catch(e => {
-          this.errorTutor = e;
+          this.errorSubject = e.message;
+          console.log(this.errorSubject)
         });
     },
     deleteRow(rowData) {
-      AXIOS.delete(`tutor/delete/${rowData.personId}`)
+      AXIOS.delete(`subject/delete/${rowData.courseID}`)
         .then(response => {
-          this.errorTutor = "";
+          this.errorSubject = "";
         })
         .catch(e => {
           var errorMsg =
@@ -191,16 +181,16 @@ export default {
             ": " +
             e.response.data.message;
           console.log(errorMsg);
-          this.errorTutor = errorMsg;
+          this.errorSubject = errorMsg;
         });
       alert("You clicked delete on: " + JSON.stringify(rowData));
-      this.updateTutors();
-      if (this.errorTutor != "") {
-        alert(this.errorTutor);
+      this.updateSubjects();
+      if (this.errorSubject != "") {
+        alert(this.errorSubject);
       }
     },
     dataManager(sortOrder, pagination) {
-      let local = this.tutors;
+      let local = this.subjects;
 
       // sortOrder can be empty, so we have to check for that as well
       if (sortOrder.length > 0) {
@@ -226,11 +216,8 @@ export default {
       };
     },
     onFilterSet(filterText) {
-      let data = this.tutors.filter(tutor => {
-        return (
-          tutor.firstName.toLowerCase().includes(filterText.toLowerCase()) ||
-          tutor.lastName.toLowerCase().includes(filterText.toLowerCase())
-        );
+      let data = this.subjects.filter(subject => {
+        return subject.name.toLowerCase().includes(filterText.toLowerCase());
       });
 
       this.$refs.vuetable.setData(data);
@@ -257,8 +244,7 @@ export default {
     this.$root.$on("setDarkModeState", this.setDarkMode);
     this.$events.$on("filter-set", eventData => this.onFilterSet(eventData));
     this.$events.$on("filter-reset", e => this.onFilterReset());
-    document.getElementsByName("search")[0].placeholder =
-      "Search first/last name..";
+    document.getElementsByName("search")[0].placeholder = "Search name..";
   }
 };
 </script>
@@ -276,7 +262,7 @@ b-container {
 .pagination {
   margin-bottom: 10px;
 }
-#tutorList {
+#subjectList {
   border-width: 5px;
   border-style: groove;
 }

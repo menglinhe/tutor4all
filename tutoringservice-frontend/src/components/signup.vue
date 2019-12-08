@@ -1,18 +1,14 @@
-<!--- This component acts as a page to signup --->
+<!--- This component acts as a page to createManager --->
 <template>
-  <div id="signup" class="card" v-bind:style="{ backgroundColor : bgColor }">
+  <div id="createManager" class="card" v-bind:style="{ backgroundColor : bgColor }">
     <span id="title" v-bind:style="{color : textColor}">
       <center>Create an account</center>
     </span>
-    <div>
-      <span id="title1"></span>
-    </div>
-
-    <b-container fluid>
+    <b-container fluid :style="{ color: textColor}">
       <form>
         First name:
         <input
-          class="signupField"
+          class="createManagerField"
           type="text"
           id="first"
           v-model="first"
@@ -22,7 +18,7 @@
       <form>
         Last name:
         <input
-          class="signupField"
+          class="createManagerField"
           type="text"
           id="last"
           v-model="last"
@@ -30,62 +26,56 @@
         />
       </form>
       <form>
-        Date of Birth:
+        Birthdate:
         <input
-          class="signupField"
+          class="createManagerField"
           type="date"
           id="dob"
           v-model="dob"
-          placeholder="YYYY-MM-DD"
+          placeholder="MM-DD-YYYY"
+          style="margin-right:13px;"
         />
       </form>
       <form>
-        Email:
+        <label style="margin-left:77px;">Email:</label>
         <input
-          class="signupField"
+          class="createManagerField"
           type="text"
           id="email"
           v-model="email"
           placeholder="Enter email"
+          style="margin-right:45px;"
         />
       </form>
       <form>
-        Phone number:
+        <label style="margin-left:77px;">Phone:</label>
         <input
-          class="signupField"
+          class="createManagerField"
           type="text"
           id="phone"
           v-model="phone"
           placeholder="Enter phone number"
-        />
-      </form>
-      <form>
-        Manager ID (all numbers):
-        <input
-          class="signupField"
-          type="text"
-          id="managerID"
-          v-model="managerID"
-          placeholder="Enter manager ID"
+          style="margin-right:52px;"
         />
       </form>
       <form>
         Username:
         <input
-          class="signupField"
+          class="createManagerField"
           type="text"
-          id="username"
-          v-model="username"
+          id="userName"
+          v-model="userName"
           placeholder="Enter username"
+          style="margin-right:3px;"
         />
       </form>
       <form>
         Password:
         <input
-          class="signupField"
+          class="createManagerField"
           type="password"
           id="password"
-          v-model="pw"
+          v-model="password"
           placeholder="Enter password"
         />
       </form>
@@ -93,11 +83,9 @@
         <button
           type="button"
           id="myButton"
-          @click="signup(first,last,dob,email,phone,managerID,login,request,review,commission,classroom,system)"
-          class="btn btn-primary btn-lg signupField button"
-          v-bind:class="buttonClass"
+          @click="createManager()"
+          class="btn btn-primary btn-lg createManagerField button"
           v-b-tooltip.hover
-          title="Click to create an account!"
         >Create</button>
       </center>
     </b-container>
@@ -107,118 +95,182 @@
 <script>
 import axios from "axios";
 import Router from "../router";
-import Axios from 'axios';
 
 var config = require("../../config");
-
 var frontendUrl = "http://" + config.build.host + ":" + config.build.port;
-var backendUrl ="http://localhost:8080/";
-  // "http://" + config.build.backendHost + ":" + config.build.backendPort;
-
+var backendUrl = "http://localhost:8080/";
+// "http://" + config.build.backendHost + ":" + config.build.backendPort;
 // axios config
 var AXIOS = axios.create({
   baseURL: backendUrl,
   headers: { "Access-Control-Allow-Origin": frontendUrl }
 });
-
-// function LoginDto (username, password) {
-//   this.username = username
-//   this.password = password
-// }
-//  var username=document.getElementById("username");
-//       var password=document.getElementById("password");
-//       var login = {"username":"username", "password":"password"};
-
 export default {
   data() {
     return {
-      manager: {
-        type: Object
-      },
       bgColor: "",
       textColor: "",
       buttonClass: "",
-      error: "",
+      errorSignup: "",
       first: "",
       last: "",
       dob: "",
       email: "",
       phone: "",
-      managerID: "",
-      username: "",
+      manager: [],
+      userName: "",
       password: "",
-      login: "",
-      request: null,
-      review: null,
-      commission: null,
-      classroom: null,
-      system: "1"
+      managerID: "",
+      login: [],
+      tutoringSystem: []
     };
   },
   created: function() {
-    // fetch the user's selected UI mode from brower local storage
-    var darkModeOn = localStorage.getItem("DarkModeOn");
-    if (darkModeOn === "true") {
-      this.bgColor = "rgb(53,58,62)";
-      this.textColor = "white";
-      this.buttonClass = "btn btn-dark btn-lg signupField";
-    } else {
-      this.bgColor = "rgb(250,250,250)";
-      this.textColor = "black";
-      // this.bgColor = "rgb(248, 249, 251)";
-      this.buttonClass = "btn btn-white btn-lg signupField";
-    }
+    this.updateTutoringSystem();
+    this.updateLogin();
+    this.setDarkMode()
   },
   methods: {
-
-    // send get request to fetch manager
-    // getLogin: function(username, password) {
-    //   AXIOS.get('/login/list/'+username)
-    //     .then(response => {
-    //       // this.login = response.data;
-    //       var login = ;
-    //     })
-    //     // .catch(e => {
-    //     //   console.log(e.message);
-    //     //   document.getElementById("title1").innerText =
-    //     //     "Account does not exist, please try again";
-    //     // });
-    // },
-    // myLogin: function (username, password) {
-    //   var username=document.getElementById("username");
-    //   var password=document.getElementById("password");
-    // },
-    signup: function(
-      first,
-      last,
-      dob,
-      email,
-      phone,
-      managerID,
-      login,
-      request,
-      review,
-      commission,
-      classroom,
-      system
-    ) {
-      AXIOS.post("")
-      AXIOS.post(
-        "/manager/create/" +  managerID + "?first=" + first + "&last=" + last + "&dob=" + dob +
-          "&email=" + email + "&phone=" + phone + "&login=" + login +"&request=" + request +
-          "&review=" + review + "&commission=" +  commission + "&classroom=" + classroom +
-          "&system=" + system
-      )
+    updateLogin() {
+      AXIOS.get("login/list/")
         .then(response => {
-          this.manager = response.data;
-          this.goToHomePage();
+          this.login = response.data;
         })
         .catch(e => {
-          console.log(e.message);
-          // this.error = error
-          document.getElementById("title1").innerText =
-            "Please enter missing information!";
+          this.errorSignup = e.message
+          console.log(this.errorSignup);
         });
+    },
+    updateTutoringSystem() {
+      AXIOS.get("tutoringSystem/list/")
+        .then(response => {
+          this.tutoringSystem = response.data;
+        })
+        .catch(e => {
+          this.errorSignup = e.message
+          console.log(this.errorSignup);
+        });
+    },
+    generateManagerID() {
+      if (this.tutoringSystem != "") {
+        this.managerID = 0;
+        for (var i = 0; i < this.tutoringSystem.length; i++) {
+          if (this.tutoringSystem[i].tutoringSystemID == 1) {
+            for (var j = 0; j < this.tutoringSystem[i].person.length; j++) {
+              if (this.tutoringSystem[i].person[j] > this.managerID) {
+                this.managerID = this.tutoringSystem[i].person[j];
+              }
+            }
+          } else {
+            alert("No tutoring system with ID=1 is found!");
+            return -1;
+          }
+        }
+      } else {
+        alert("ERROR: No tutoring system is found!");
+        return -1;
+      }
+      this.managerID += 1;
+    },
+    ValidateSignup: function() {
+      if(this.userName != "" && this.password != "" && this.first != "" && this.last != "" && this.dob != "" && this.phone != "" && this.email != "") { 
+        var isValid = true
+        for(var i=0; i < this.login.length; i++){
+          if(this.login[i].userName == this.userName){
+            isValid = false
+            break;
+          }
+        }
+        if(isValid == false){
+          alert("ERROR: The username " +  this.userName + " already exists! Choose another one")
+          return -1
+        } 
+      }
+      else{
+        alert("ERROR: All entries must be present to signup!")
+        return -1
+      }
+    },
+    setLogin() {
+      AXIOS.post("login/" + this.userName + "?password=" + this.password)
+        .then(response => {
+          this.login.push(response.data);
+          this.errorSignup = "";
+        })
+        .catch(e => {
+          var errorMsg =
+            e.response.status +
+            " " +
+            e.response.data.error +
+            ": " +
+            e.response.data.message;
+          console.log(errorMsg);
+          this.errorSignup = errorMsg;
+        });
+      alert("Your assigned manager ID: " + this.managerID);
+      if (this.errorSignup != "") {
+        alert("ERROR: " + this.errorSignup);
+        return -1;
+      }
+    },
+    createManager: function() {
+      if (this.generateManagerID() == -1) {
+        return -1;
+      }
+      if(this.ValidateSignup() == -1){
+        return -1
+      }
+      if (this.setLogin() == -1) {
+        return -1;
+      }
+      AXIOS.post(
+        "/manager/create/" +
+          this.managerID +
+          "?first=" +
+          this.first +
+          "&last=" +
+          this.last +
+          "&dob=" +
+          this.dob +
+          "&email=" +
+          this.email +
+          "&phone=" +
+          this.phone +
+          "&userName=" +
+          this.userName +
+          "&tutoringSystemID=1"
+      )
+        .then(response => {
+          this.manager.push(response.data);
+          this.errorSignup = "";
+        })
+        .catch(e => {
+          var errorMsg =
+            e.response.status +
+            " " +
+            e.response.data.error +
+            ": " +
+            e.response.data.message;
+          console.log(errorMsg);
+          this.errorSignup = errorMsg;
+        });
+      this.first = "";
+      this.last = "";
+      this.dob = "";
+      this.email = "";
+      this.phone = "";
+      this.userName = "";
+      this.password = "";
+      alert(
+        "You clicked on create an account! Validating before redirecting.."
+      );
+      if (this.errorSignup != "") {
+        alert("ERROR: " + this.errorSignup);
+        return -1;
+      } else {
+        this.$events.fire("loggedIn-set", this.userName);
+        this.goToHomePage();
+      }
     },
     goToHomePage: function() {
       Router.push({
@@ -226,22 +278,16 @@ export default {
         name: "home"
       });
     },
-    // goToSignupPage: function() {
-    //     Router.push({
-    //         path: "/signup",
-    //         name: "signup"
-    //     });
-    // },
     setDarkMode: function() {
       var darkModeOn = localStorage.getItem("DarkModeOn");
       if (darkModeOn === "true") {
         this.bgColor = "rgb(53, 58, 62)";
         this.textColor = "white";
-        this.buttonClass = "btn btn-dark btn-lg signupField";
+        this.buttonClass = "btn btn-dark btn-lg createManagerField";
       } else {
         this.bgColor = "rgb(250,250,250)";
         this.textColor = "black";
-        this.buttonClass = "btn btn-white btn-lg signupField";
+        this.buttonClass = "btn btn-white btn-lg createManagerField";
       }
     }
   },
@@ -259,22 +305,7 @@ export default {
   font-size: 26px;
   padding-left: 15px;
 }
-#title1 {
-  text-align: left;
-  color: red;
-  font-size: 15px;
-  padding-left: 15px;
-}
-#send {
-  align-content: right;
-}
-#name {
-  text-align: left;
-  color: white;
-  font-size: 26px;
-  padding-left: 15px;
-}
-#signup {
+#createManager {
   width: 30%;
   max-height: auto;
   min-width: 550px;
@@ -287,11 +318,7 @@ export default {
 b-container {
   height: 100%;
 }
-/* #myButton{
-    justify-content: center;
-    align-self: center;
-} */
-.signupField {
+.createManagerField {
   width: auto;
   height: auto;
   border-radius: 4px;
@@ -299,12 +326,12 @@ b-container {
   padding: 2%;
   margin: auto;
   margin-top: 5px;
+  margin-left: 5px;
 }
 .button {
   color: white;
-  /* align-self: auto; */
 }
-#btn1 {
+#myButton{
   align-self: center;
 }
 </style>

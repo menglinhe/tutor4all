@@ -1,10 +1,9 @@
-<!--- This component acts as a page to view tutor list and add/remove tutor --->
 <template>
-  <div id="tutor" class="card" v-bind:style="{ backgroundColor: bgColor}">
+  <div id="availableSession" class="card" v-bind:style="{ backgroundColor: bgColor}">
     <b-container fluid :style="{color: textColor}">
-      <b-col id="tutorList">
+      <b-col id="availableSessionList">
         <h6>
-          <strong>VIEW TUTORS</strong>
+          <strong>VIEW AVAILABLE SESSIONS</strong>
         </h6>
 
         <div id="table-wrapper" class="container">
@@ -26,7 +25,7 @@
               <div class="table-button-container">
                 <button
                   class="btn btn-danger btn-sm icon"
-                  title="Remove tutor!"
+                  title="Remove available session!"
                   @click="deleteRow(props.rowData)"
                 >
                   <i class="fa fa-trash"></i>
@@ -69,7 +68,7 @@ var AXIOS = axios.create({
 });
 
 export default {
-  name: "tutor",
+  name: "availableSession",
   components: {
     Vuetable,
     VuetablePagination,
@@ -80,7 +79,7 @@ export default {
     return {
       perPage: 10,
       css: {
-        tableClass: `table table-bordered table-hover`,
+        tableClass: "table table-bordered table-hover",
         ascendingIcon: "fa fa-chevron-up",
         descendingIcon: "fa fa-chevron-down",
         loadingClass: "loading",
@@ -89,57 +88,46 @@ export default {
       },
       sortOrder: [
         {
-          field: "personId",
-          sortField: "personId",
+          field: "availableSessionID",
+          sortField: "availableSessionID",
           direction: "asc"
         }
       ],
       fields: [
         {
-          name: "personId",
+          name: "availableSessionID",
           title: "ID",
-          sortField: "personId"
+          sortField: "availableSessionID"
         },
         {
-          name: "firstName",
-          title: `<span class="icon orange"><i class="fa fa-user"></i></span> First Name`,
-          sortField: "firstName"
+          name: "day",
+          title: `<span class="icon orange"><i class="fas fa-calendar-day"></i></span> Day`,
+          sortField: "day"
         },
         {
-          name: "lastName",
-          title: `<span class="icon orange"><i class="fa fa-user"></i></span> Last Name`,
-          sortField: "lastName"
-        },
-        {
-          name: "dateOfBirth",
+          name: "startTime",
           title:
-            '<span class="icon orange"><i class="fa fa-birthday-cake"></i></span> Birthdate',
-          sortField: "dateOfBirth"
+            '<span class="icon orange"><i class="fas fa-hourglass-start"></i></span> Start Time',
+          sortField: "startTime"
         },
         {
-          name: "email",
+          name: "endTime",
           title:
-            '<span class="icon orange"><i class="fa fa-envelope"></i></span> Email',
-          sortField: "email"
+            '<span class="icon orange"><i class="fas fa-hourglass-end"></i></span> End Time',
+          sortField: "endTime"
         },
         {
-          name: "phoneNumber",
-          title:
-            '<span class="icon orange"><i class="fa fa-phone"></i></span> Phone',
-          sortField: "phoneNumber"
-        },
-        {
-          name: "isRegistered",
-          title: "Registered",
-          sortField: "isRegistered"
+          name: "tutor",
+          title: `<span class="icon orange"><i class="fas fa-chalkboard-teacher"></i></span> Tutor IDs`,
+          sortField: "tutor"
         },
         {
           name: "actions",
           title: "Actions"
         }
       ],
-      tutors: [],
-      errorTutor: "",
+      availableSessions: [],
+      errorAvailableSession: "",
       response: [],
       bgColor: "",
       textColor: ""
@@ -147,14 +135,14 @@ export default {
   },
 
   watch: {
-    tutors(newVal, oldVal) {
+    availableSessions(newVal, oldVal) {
       this.$refs.vuetable.refresh();
     }
   },
 
   created: function() {
-    this.updateTutors();
-    this.setDarkMode()
+    this.updateAvailableSessions();
+    this.setDarkMode();
   },
   methods: {
     renderIcon(classes, options) {
@@ -167,21 +155,22 @@ export default {
     onChangePage(page) {
       this.$refs.vuetable.changePage(page);
     },
-    updateTutors() {
-      // Initializing students from backend
-      AXIOS.get(`tutor/list`)
+    updateAvailableSessions() {
+      // Initializing available sessions from backend
+      AXIOS.get(`availableSession/list`)
         .then(response => {
           // JSON responses are automatically parsed.
-          this.tutors = response.data;
+          this.availableSessions = response.data;
         })
         .catch(e => {
-          this.errorTutor = e;
+          this.errorAvailableSession = e.message;
+          console.log(this.errorAvailableSession);
         });
     },
     deleteRow(rowData) {
-      AXIOS.delete(`tutor/delete/${rowData.personId}`)
+      AXIOS.delete(`availableSession/delete/${rowData.availableSessionID}`)
         .then(response => {
-          this.errorTutor = "";
+          this.errorAvailableSession = "";
         })
         .catch(e => {
           var errorMsg =
@@ -191,16 +180,16 @@ export default {
             ": " +
             e.response.data.message;
           console.log(errorMsg);
-          this.errorTutor = errorMsg;
+          this.errorAvailableSession = errorMsg;
         });
       alert("You clicked delete on: " + JSON.stringify(rowData));
-      this.updateTutors();
-      if (this.errorTutor != "") {
-        alert(this.errorTutor);
+      this.updateAvailableSessions();
+      if (this.errorAvailableSession != "") {
+        alert(this.errorAvailableSession);
       }
     },
     dataManager(sortOrder, pagination) {
-      let local = this.tutors;
+      let local = this.availableSessions;
 
       // sortOrder can be empty, so we have to check for that as well
       if (sortOrder.length > 0) {
@@ -226,11 +215,8 @@ export default {
       };
     },
     onFilterSet(filterText) {
-      let data = this.tutors.filter(tutor => {
-        return (
-          tutor.firstName.toLowerCase().includes(filterText.toLowerCase()) ||
-          tutor.lastName.toLowerCase().includes(filterText.toLowerCase())
-        );
+      let data = this.availableSessions.filter(availableSession => {
+        return availableSession.day.toString().includes(filterText.toString());
       });
 
       this.$refs.vuetable.setData(data);
@@ -257,8 +243,7 @@ export default {
     this.$root.$on("setDarkModeState", this.setDarkMode);
     this.$events.$on("filter-set", eventData => this.onFilterSet(eventData));
     this.$events.$on("filter-reset", e => this.onFilterReset());
-    document.getElementsByName("search")[0].placeholder =
-      "Search first/last name..";
+    document.getElementsByName("search")[0].placeholder = "Search day..";
   }
 };
 </script>
@@ -276,11 +261,11 @@ b-container {
 .pagination {
   margin-bottom: 10px;
 }
-#tutorList {
+.icon {
+  width: 30px;
+}
+#availableSessionList {
   border-width: 5px;
   border-style: groove;
-}
-.icon{
-  width: 30px;
 }
 </style>

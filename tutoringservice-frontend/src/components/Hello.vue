@@ -1,8 +1,6 @@
 <template>
 <div class="hello">
   <b-container fluid class="home-row">
-    <!-- <button type="button" v-on:click="goToSignupPage()" class="btn btn-primary btn-lg loginField button" v-b-tooltip.hover title="Create an account">Sign up</button> -->
-
     <b-row>
       <b-col>
         <button
@@ -34,7 +32,7 @@
     </b-row>
   </b-container>
 
-  <div id="description">
+  <div id="description" v-bind:style="{color: textColor}">
     <body>
       <hr />
       <!-- <p>Welcome to our company, <b>Tutor4All</b>. We open from 9-9, 7 days a week.<br/></p> -->
@@ -45,7 +43,9 @@
         <li>Cegep Courses: Math, Physics, Chemistry, English, French, Biolgy, Businese, etc.</li>
         <li>
           University Courses:
-          <a href="https://mcgill.ca/study/2019-2020/courses/search">McGill University</a>,
+          <a
+            href="https://mcgill.ca/study/2019-2020/courses/search"
+          >McGill University</a>,
           <a
             href="https://www.concordia.ca/artsci/academics/undergraduate.html"
           >Concordia University</a>,
@@ -74,7 +74,7 @@ var backendUrl =
 //     headers: {"Access-Control-Allow-Origin": frontendUrl}
 // });
 export default {
-  name: "hello",
+  name: "Hello",
   data() {
     return {
       msg: "Welcome to Your Vue.js App"

@@ -12,7 +12,9 @@ import commission from "@/components/commission";
 import review from "@/components/review";
 import student from "@/components/student";
 import subjectRequest from "@/components/subjectRequest";
-import home1 from "@/components/home1";
+import subject from "@/components/subject";
+import offering from "@/components/offering";
+import availableSession from "@/components/availableSession";
 
 Vue.use(Router)
 
@@ -79,9 +81,19 @@ export default new Router({
       component: subjectRequest
     },
     {
-      path: "/home1",
-      name: "home1",
-      component: home1
+      path: "/subject",
+      name: "subject",
+      component: subject
+    },
+    {
+    path: "/offering",
+    name: "offering",
+    component: offering
+    },
+    {
+    path: "/availableSession",
+    name: "availableSession",
+    component: availableSession
     },
   ]
 });
